@@ -1,1 +1,33 @@
-# kba-neuzulassungen-json.
+name: Update KBA JSON
+
+on:
+  schedule:
+    - cron: '0 8 10 * *'  # Jeden Monat am 10. um 08:00 Uhr
+  workflow_dispatch:
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Python installieren
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Abhängigkeiten installieren
+        run: pip install pandas openpyxl requests
+
+      - name: JSON generieren
+        run: python scripts/generate_kba_json.py
+
+      - name: Änderungen committen
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add data/neuzulassungen.json
+          git commit -m "Automatische Aktualisierung der KBA-Daten"
+          git push
