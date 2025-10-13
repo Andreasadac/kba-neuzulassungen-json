@@ -3,7 +3,7 @@ name: Update KBA JSON
 on:
   schedule:
     - cron: '0 8 10 * *'  # Jeden Monat am 10. um 08:00 Uhr
-  workflow_dispatch:
+  workflow_dispatch:      # Manuelles Auslösen über GitHub UI
 
 jobs:
   update-json:
@@ -24,7 +24,7 @@ jobs:
       - name: JSON generieren
         run: python scripts/generate_kba_json.py
 
-      - name: Änderungen committen
+      - name: Änderungen committen und pushen
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
