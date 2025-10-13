@@ -1,9 +1,10 @@
+
 name: Update KBA JSON
 
 on:
   schedule:
     - cron: '0 8 10 * *'  # Jeden Monat am 10. um 08:00 Uhr
-  workflow_dispatch:      # Manuelles Auslösen über GitHub UI
+  workflow_dispatch:
 
 jobs:
   update-json:
