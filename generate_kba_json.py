@@ -9,8 +9,12 @@ heute = datetime.today()
 if heute.day < 6 or heute.day > 12:
     print("Heute ist nicht zwischen dem 6. und 12. – kein automatischer Download.")
 else:
-    # URL zur KBA-Pressemitteilungsdatei für September 2025
-    url = "https://www.kba.de/SharedDocs/Downloads/DE/Pressemitteilungen/2025/pm_39_2025_fahrzeugzulassungen_09_2025.xlsx?__blob=publicationFile"
+    # Monat und Jahr für die URL bestimmen
+    jahr = heute.year
+    monat = heute.month
+
+    # Beispielhafte URL-Struktur – muss ggf. angepasst werden, wenn KBA andere Dateinamen verwendet
+    url = f"https://www.kba.de/SharedDocs/Downloads/DE/Pressemitteilungen/{jahr}/pm_39_{jahr}_fahrzeugzulassungen_{monat:02}_{jahr}.xlsx?__blob=publicationFile"
 
     try:
         response = requests.get(url)
@@ -35,9 +39,10 @@ else:
             ]
         }
 
-        with open("data/neuzulassungen_september_2025.json", "w", encoding="utf-8") as f:
+        json_filename = f"data/neuzulassungen_{jahr}_{monat:02}.json"
+        with open(json_filename, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-        print("Die JSON-Datei wurde erfolgreich erstellt: data/neuzulassungen_september_2025.json")
+        print(f"Die JSON-Datei wurde erfolgreich erstellt: {json_filename}")
     except Exception as e:
         print("Fehler beim Herunterladen oder Verarbeiten der Datei:", e)
