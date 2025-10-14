@@ -35,3 +35,4 @@ jobs:
         git add kba_neuzulassungen_infogram.json
         git commit -m "Automatische Aktualisierung der KBA JSON-Datei mit Monatsnamen" || echo "Keine Änderungen zum Commit"
         git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Andreasadac/kba-neuzulassungen-json.git
+        git push origin HEAD:main
