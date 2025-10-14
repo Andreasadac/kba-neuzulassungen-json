@@ -2,9 +2,8 @@ name: KBA Neuzulassungen JSON Generator
 
 on:
   schedule:
-    # Läuft täglich zwischen dem 6. und 12. eines Monats um 07:00 UTC
-    - cron: '0 7 6-12 * *'
-  workflow_dispatch:  # Manuelles Auslösen möglich
+    - cron: '0 7 6-12 * *'  # Täglich zwischen dem 6. und 12. um 07:00 UTC
+  workflow_dispatch:
 
 jobs:
   generate-json:
@@ -32,8 +31,8 @@ jobs:
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
         git add kba_neuzulassungen_infogram.json
         git commit -m "Automatische Aktualisierung der KBA JSON-Datei" || echo "Keine Änderungen zum Commit"
-        git push https://x-access-token:${GH_PAT}@github.com/Andreasadac/kba-neuzulassungen-json.git HEAD:main
+        git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Andreasadac/kba-neuzulassungen-json.git
