@@ -27,11 +27,11 @@ jobs:
         python scripts/generate_kba_json_monthly.py
 
     - name: Änderungen committen und pushen
-      env:
-        GH_PAT: ${{ secrets.GH_PAT }}
-      run: |
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@github.com"
-        git add kba_neuzulassungen_infogram.json
-        git commit -m "Automatische Aktualisierung der KBA JSON-Datei mit Monatsnamen" || echo "Keine Änderungen zum Commit"
-        git push https://x-access-token:${GH_PAT}@github.com/Andreasadac/kba-neuzulassungen-json.git HEAD:main
+  env:
+    GH_PAT: ${{ secrets.GH_PAT }}
+  run: |
+    git config --global user.name "github-actions"
+    git config --global user.email "github-actions@github.com"
+    git add kba_neuzulassungen_infogram.json
+    git commit -m "Automatische Aktualisierung der KBA JSON-Datei mit Monatsnamen" || echo "Keine Änderungen zum Commit"
+    git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Andreasadac/kba-neuzulassungen-json.git
