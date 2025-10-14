@@ -61,5 +61,6 @@ infogram_data = {
     'Marktanteile': [['Marke', 'Prozent']] + [[marke, anteil] for marke, anteil in marktanteile.items()]
 }
 
-with open('kba_neuzulassungen_infogram.json', 'w', encoding='utf-8') as f:
-    json.dump(infogram_data, f, indent=4, ensure_ascii=False)
+with open("kba_neuzulassungen_infogram.json", "w", encoding="utf-8") as f:
+    json.dump(infogram_data, f, ensure_ascii=False, indent=2)
+
