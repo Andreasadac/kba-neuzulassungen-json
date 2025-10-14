@@ -29,8 +29,8 @@ jobs:
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
 
-    - name: Änderungen committen und pushen
+    - name: Änderungen committen und pushen (auch bei identischem Inhalt)
       run: |
         git add kba_neuzulassungen_infogram.json
-        git commit -m "Automatische Aktualisierung der KBA JSON-Datei im Infogram-Format"
+        git diff --cached --quiet || git commit -m "Automatische Aktualisierung der KBA JSON-Datei im Infogram-Format"
         git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/Andreasadac/kba-neuzulassungen-json.git HEAD:main
