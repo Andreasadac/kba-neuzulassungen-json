@@ -25,7 +25,7 @@ jobs:
 
     - name: JSON-Datei generieren
       run: |
-        python scripts/generate_kba_json.py
+    python scripts/generate_kba_json_monthly.py
 
     - name: Änderungen committen und pushen
       env:
