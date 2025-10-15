@@ -1,8 +1,8 @@
-name: generate-json
+name: KBA Infogram JSON Generator
 
 on:
   schedule:
-    - cron: '0 8 6-12 * *'  # Täglich zwischen dem 6. und 12. um 08:00 Uhr
+    - cron: '0 8 6-12 * *'  # Läuft täglich zwischen dem 6. und 12. um 08:00 Uhr
   workflow_dispatch:       # Manuell auslösbar
 
 jobs:
@@ -19,9 +19,11 @@ jobs:
         python-version: '3.11'
 
     - name: Abhängigkeiten installieren
-      run: python -m pip install --upgrade pip
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas openpyxl beautifulsoup4 requests
 
-    - name: JSON für Infogram erzeugen
+    - name: JSON aus KBA-Daten erzeugen
       run: python scripts/generate_kba_json_monthly.py
 
     - name: Git konfigurieren
@@ -29,8 +31,8 @@ jobs:
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
 
-    - name: Änderungen committen und pushen (auch bei identischem Inhalt)
+    - name: Änderungen committen und pushen
       run: |
         git add kba_neuzulassungen_infogram.json
-        git diff --cached --quiet || git commit -m "Automatische Aktualisierung der KBA JSON-Datei im Infogram-Format"
-        git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/Andreasadac/kba-neuzulassungen-json.git HEAD:main
+        git diff --cached --quiet || git commit -m "Automatische Aktualisierung der KBA JSON-Datei"
+        git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }} HEAD:main
