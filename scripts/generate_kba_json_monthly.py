@@ -1,42 +1,74 @@
+import requests
+import re
 import json
+import pandas as pd
+from bs4 import BeautifulSoup
 from datetime import datetime
+from io import BytesIO
 
-monat = datetime.now().strftime('%B')
+# KBA-Pressemitteilungsübersicht
+base_url = "https://www.kba.de/SiteGlobals/Forms/Suche/Pressemitteilungen/Pressemitteilungensuche_Formular.html?nn=827402"
 
-neuzulassungen = [
-    ["Marke", "Anzahl"],
-    ["VW", 45225], ["Mercedes", 20338], ["BMW", 19388], ["Skoda", 18872],
-    ["Audi", 15728], ["Seat", 13247], ["Opel", 12324], ["Ford", 9065],
-    ["Toyota", 7987], ["Hyundai", 7519], ["Dacia", 5703], ["Kia", 5208],
-    ["Renault", 5078], ["Peugeot", 4428], ["Fiat", 4400], ["Citroen", 4315],
-    ["Volvo", 4026], ["Mazda", 3809], ["Tesla", 3404], ["BYD", 3255],
-    ["Nissan", 3237], ["Mini", 3072], ["MG Roewe", 2615], ["Porsche", 2247],
-    ["Suzuki", 2226]
-]
+# HTML abrufen und durchsuchen
+response = requests.get(base_url)
+soup = BeautifulSoup(response.content, "html.parser")
 
-marktanteile = [
-    ["Marke", "Prozent"],
-    ["VW", 19.2], ["Mercedes", 8.6], ["BMW", 8.2], ["Skoda", 8.0],
-    ["Audi", 6.7], ["Seat", 5.6], ["Opel", 5.2], ["Ford", 3.8],
-    ["Toyota", 3.4], ["Hyundai", 3.2], ["Dacia", 2.4], ["Kia", 2.2],
-    ["Renault", 2.2], ["Peugeot", 1.9], ["Fiat", 1.9], ["Citroen", 1.8],
-    ["Volvo", 1.7], ["Mazda", 1.6], ["Tesla", 1.4], ["BYD", 1.4],
-    ["Nissan", 1.4], ["Mini", 1.3], ["MG Roewe", 1.1], ["Porsche", 1.0],
-    ["Suzuki", 0.9]
-]
+# Aktuellste Pressemitteilung zur Fahrzeugzulassung finden
+link_tag = soup.find("a", string=re.compile("Fahrzeugzulassungen.*2025"))
+if not link_tag:
+    raise Exception("Keine passende Pressemitteilung gefunden.")
 
+# Detailseite öffnen
+detail_url = "https://www.kba.de" + link_tag.get("href")
+detail_response = requests.get(detail_url)
+detail_soup = BeautifulSoup(detail_response.content, "html.parser")
+
+# Excel-Link extrahieren
+excel_link = detail_soup.find("a", href=re.compile(".*merkmale.*\\.xlsx"))
+if not excel_link:
+    raise Exception("Kein Excel-Link gefunden.")
+
+excel_url = "https://www.kba.de" + excel_link.get("href")
+
+# Excel-Datei herunterladen
+excel_response = requests.get(excel_url)
+excel_data = BytesIO(excel_response.content)
+
+# Monat aus dem Titel extrahieren
+title_text = link_tag.text
+monat_match = re.search(r"im (\\w+) 2025", title_text)
+monat = monat_match.group(1) if monat_match else datetime.now().strftime('%B')
+
+# Excel-Datei verarbeiten
+xls = pd.ExcelFile(excel_data, engine="openpyxl")
+sheet_names = xls.sheet_names
+
+# Tabellenblätter identifizieren
+neuzulassung_sheet = next((s for s in sheet_names if "Neuzulassungen" in s), sheet_names[0])
+marktanteil_sheet = next((s for s in sheet_names if "Marktanteile" in s), sheet_names[-1])
+
+df_neu = xls.parse(neuzulassung_sheet)
+df_markt = xls.parse(marktanteil_sheet)
+
+# Daten extrahieren
+neuzulassungen = [["Marke", "Anzahl"]]
+marktanteile = [["Marke", "Prozent"]]
+
+for _, row in df_neu.iterrows():
+    if pd.notna(row.get("Marke")) and pd.notna(row.get("Anzahl")):
+        neuzulassungen.append([row["Marke"], int(row["Anzahl"])])
+
+for _, row in df_markt.iterrows():
+    if pd.notna(row.get("Marke")) and pd.notna(row.get("Prozent")):
+        marktanteile.append([row["Marke"], round(float(row["Prozent"]), 1)])
+
+# Infogram-kompatible JSON erzeugen
 infogram_data = [
-    {
-        "title": f"Neuzulassungen {monat}",
-        "data": neuzulassungen
-    },
-    {
-        "title": f"Marktanteile {monat}",
-        "data": marktanteile
-    }
+    [[f"Neuzulassungen {monat} 2025"]] + neuzulassungen,
+    [[f"Marktanteile {monat} 2025"]] + marktanteile
 ]
 
 with open("kba_neuzulassungen_infogram.json", "w", encoding="utf-8") as f:
     json.dump(infogram_data, f, ensure_ascii=False, indent=2)
 
-print(f"Die Datei 'kba_neuzulassungen_infogram.json' wurde erfolgreich mit dem Monatstitel '{monat}' erstellt.")
+print(f"Die Datei 'kba_neuzulassungen_infogram.json' wurde erfolgreich mit dem Monatstitel '{monat} 2025' erstellt.")
