@@ -27,7 +27,6 @@ jobs:
           python scripts/generate_kba_json_monthly.py
 
       - name: Upload JSON Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kba-json
-          path: kba_neuzulassungen_*.json
