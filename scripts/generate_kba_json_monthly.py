@@ -35,3 +35,4 @@ with open(output_file, "w", encoding="utf-8") as f:
     json.dump(json_data, f, ensure_ascii=False, indent=2)
 
 print(f"✅ JSON-Datei erfolgreich erstellt: {output_file} ({len(json_data)} Marken)")
+
